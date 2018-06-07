@@ -1,0 +1,77 @@
+在LINUX平台上手动创建数据库(oracle 10g)
+
+1.首先设置要创建的ORACLE的SID，如果在.bash_profile文件里设置里该变量，就不用设置了。
+$echo $ORACEL_SID
+mdy
+如果没有设置，就手动设置，如果一个服务器上要运行多个ORACLE实例，也需要手动设置。
+export ORACLE_SID=mydb
+
+2. 创建需要的诊断目录，这些目录都是ORACLE进程遇到错误或用户手动TRACE时需要的。
+mkdir -p $ORACLE_BASE/admin/mydb/adump
+mkdir -p $ORACLE_BASE/admin/mydb/bdump
+mkdir -p $ORACLE_BASE/admin/mydb/cdump
+mkdir -p $ORACLE_BASE/admin/mydb/udump
+mkdir -p $ORACLE_BASE/admin/mydb/pfile
+创建oracle的数据文件目录
+mkdir -p $ORACLE_BASE/oradata/mydb
+
+3. 创建ORACLE的参数文件$ORACLE_HOME/dbs/initmydb.ora 内容如下：
+
+aq_tm_processes=0
+audit_file_dest=/oracle/admin/mydb/adump
+background_dump_dest=/oracle/admin/mydb/bdump
+compatible=10.2.0.1.0
+control_files=/oracle/oradata/mydb/control01.ctl, /oracle/oradata/mydb/control02.ctl, /oracle/oradata/mydb/control03.ctl
+core_dump_dest=/oracle/admin/mydb/cdump
+db_block_size=8192
+db_domain=""
+db_file_multiblock_read_count=16
+db_name=mydb
+instance_name=mydb
+dispatchers="(PROTOCOL=TCP) (SERVICE=mydbXDB)"
+job_queue_processes=10
+nls_length_semantics=BYTE
+open_cursors=300
+pga_aggregate_target=94371840
+processes=150
+remote_login_passwordfile=EXCLUSIVE
+resource_manager_plan=""
+sessions=170
+sga_target=285212672
+undo_management=AUTO
+undo_retention=900
+undo_tablespace=UNDOTBS1
+user_dump_dest=/oracle/admin/mydb/udump
+
+4.创建密码文件
+orapwd file=$ORACLE_HOME/dbs/orapwmydb password=admin entries=5 force=y
+
+5.创建oracle的建库脚本 createdb.sql,内容如下：
+create database mydb
+MAXINSTANCES 1
+MAXLOGHISTORY 1
+MAXLOGFILES 5
+MAXLOGMEMBERS 5
+MAXDATAFILES 100
+DATAFILE
+'/oracle/oradata/mydb/system01.dbf' size 100m reuse autoextend on next 1m maxsize unlimited extent management local
+sysaux datafile
+'/oracle/oradata/mydb/sysaux01.dbf' size 100m reuse autoextend on next 1m maxsize unlimited
+default temporary tablespace TEMP tempfile
+'/oracle/oradata/mydb/temp01.dbf' size 20m reuse autoextend on next 640k maxsize unlimited
+undo tablespace UNDOTBS1 datafile
+'/oracle/oradata/mydb/undo01.dbf' size 20m reuse autoextend on next 5M maxsize unlimited
+logfile
+GROUP 1 ('/oracle/oradata/mydb/redo1.dbf') size 10m,
+GROUP 2 ('/oracle/oradata/mydb/redo2.dbf') size 10m,
+GROUP 3 ('/oracle/oradata/mydb/redo3.dbf') size 10m
+CHARACTER SET ZHS16GBK
+NATIONAL CHARACTER SET AL16UTF16
+;
+
+6.数据库创建完成后，再创建ORACLE的数据字典。
+SQL>@?/rdbms/admin/catalog.sql
+SQL>@?/rdbms/admin/catproc.sql 
+SQL>@?/rdbms/admin/catexp.sql
+
+到此ORACLE手动创建过程就完成了

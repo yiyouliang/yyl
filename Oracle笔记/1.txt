@@ -1,0 +1,47 @@
+导入静态数据：
+imp posp/posp@pospdb file=$HOME/online/sql/10gstatic_data.dmp FULL=Y ignore=y
+-----------------------
+chkconfig --list | grep telnet 查看telnet服务
+service vsftpd status/start/stop 
+service iptables stop 防火墙
+-----------------
+1.调试时修改IP,仅在当前生效,重启后恢复为原有IP
+ifconfig eth0 192.168.63.27 netmask 255.255.255.0 route add default gw 192.168.63.1 up
+2.永久生效(即重启后也能生效)
+方法1:配置网卡的配置文件
+修改/etc/sysconfig/network-scripts/ifcfg-eth0
+然后重启服务service network restart生效,或者/etc/init.d/network restart生效
+方法2:
+将ifconfig eth0 192.168.63.27 netmask 255.255.255.0 route add default gw 192.168.63.1 保存在/etc/init.d/rc.local文件中
+-------------------
+yum install vsftpd -y 自动联机下载安装并自动下载依赖关系
+yum install jre jdk-1_5_0_22-linux-amd64-rpm.bin
+yum install ftp  安装ftp客户端
+--------------------------------------------------
+getsebool -a|grep ftp
+setsebool -P ftp_home_dir 1   开启ftp访问权限
+-------------------------------
+设置vsftpd服务自启动：
+chkconfig --level 35 vsftpd on
+------------
+weblogic用户ftp无法上传文件问题：
+设置selinux无效
+setenforce 0
+如果永久无效则
+vi /etc/sysconfig/selinux  
+SELINUX=enforcing改成SELINUX=disabled
+------------
+ORA-27125: unable to create shared memory segment
+解决方法：
+[oracle@yans1 ~]$ id oracle
+uid=500(oracle) gid=502(oinstall) groups=502(oinstall),501(dba)
+[oracle@yans1 ~]$ more /proc/sys/vm/hugetlb_shm_group
+0
+下面用root执行下面的命令，将dba组添加到系统内核中：
+root# echo 501 > /proc/sys/vm/hugetlb_shm_group
+-----------------------------------------------------------
+ORA-12520: TNS:listener could not find available handler for requested type of server
+解决办法：
+alter system set processes=500 scope=spfile;
+---------------
+ifconfig em1:0 172.16.4.4 netmask 255.255.255.0 up

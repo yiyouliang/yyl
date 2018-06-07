@@ -1,0 +1,26 @@
+
+sqlplus /nolog   <<EOF
+conn / as sysdba
+
+create temporary tablespace posp_temp 
+tempfile '/u01/app/oracle/oradata/pospdb/posp_temp.dbf' 
+size 2000M autoextend on 
+next 100M maxsize 2000M extent management local; 
+
+create tablespace posp_data 
+datafile '/u01/app/oracle/oradata/pospdb/posp_data.dbf' 
+size 30000M autoextend on 
+next 100M  maxsize 30000M extent management local;
+
+create tablespace posp_idx
+datafile '/u01/app/oracle/oradata/pospdb/posp_idx.dbf' 
+size 4000M autoextend on 
+next 100M  maxsize 4000M extent management local; 
+
+create user posp identified by posp  
+default tablespace posp_data  
+temporary tablespace posp_temp;  
+
+grant connect,resource,dba to posp;  
+
+EOF

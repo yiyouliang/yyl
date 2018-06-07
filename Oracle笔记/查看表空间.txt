@@ -1,0 +1,26 @@
+1. 查看所有表空间大小
+
+SQL> select tablespace_name,sum(bytes)/1024/1024 from dba_data_files
+  2  group by tablespace_name;
+
+2. 已经使用的表空间大小
+SQL> select tablespace_name,sum(bytes)/1024/1024 from dba_free_space
+  2  group by tablespace_name;
+
+3. 所以使用空间可以这样计算
+
+select a.tablespace_name,total,free,total-free used from 
+( select tablespace_name,sum(bytes)/1024/1024 total from dba_data_files
+   group by tablespace_name) a, 
+( select tablespace_name,sum(bytes)/1024/1024 free from dba_free_space
+   group by tablespace_name) b
+where a.tablespace_name=b.tablespace_name;
+
+
+4. 下面这条语句查看所有segment的大小。
+Select Segment_Name,Sum(bytes)/1024/1024 From User_Extents Group By Segment_Name
+
+5. 还有在命令行情况下如何将结果放到一个文件里。
+SQL> spool out.txt
+SQL> select * from v$database;
+SQL> spool off

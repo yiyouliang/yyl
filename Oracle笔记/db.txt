@@ -1,0 +1,56 @@
+如果是用该用户登录使用以下语句：
+SELECT * FROM USER_TABLES;
+如果是用其他用户：
+SELECT * FROM ALL_TABLES WHERE OWNER='USER_NAME' 
+6．显示一个表的结构 
+SQL> desc table_name 
+select name from v$database;查看所在的数据库名
+select * from dba_role_privs; 查看用户权限
+drop user dzysc  cascade; 删除用户
+select * from dba_tablespaces;查看用户表空间
+----------------------------------------
+1.查看所有用户：
+  select * from dba_users;
+  select * from all_users;
+  select * from user_users;
+2.查看用户或角色系统权限(直接赋值给用户或角色的系统权限)：
+  select * from dba_sys_privs;
+  select * from user_sys_privs;
+3.查看角色(只能查看登陆用户拥有的角色)所包含的权限
+sql>select * from role_sys_privs;
+4.查看用户对象权限：
+  select * from dba_tab_privs;
+  select * from all_tab_privs;
+  select * from user_tab_privs;
+5.查看所有角色：
+  select * from dba_roles;
+6.查看用户或角色所拥有的角色：
+  select * from dba_role_privs;
+  select * from user_role_privs;
+7.查看哪些用户有sysdba或sysoper系统权限(查询时需要相应权限)
+select * from V$PWFILE_USERS
+-------------------------------------
+发现nvsp用户可以访问oracle的bin程序，但是新建的用户posp在配置好oracle的环境变量之后仍然访问不了sqlplus，没有权限。
+//问题解决/etc/group文件下的把新用户posp加在oracle用户的组oinstall后面保存，注销一下posp用户就可以了。
+--------------------
+ 1 将数据库TEST完全导出,用户名system 密码manager 导出到D:\daochu.dmp中
+   exp system/manager@TEST file=d:\daochu.dmp full=y
+ 2 将数据库中system用户与sys用户的表导出
+   exp system/manager@TEST file=d:\daochu.dmp owner=(system,sys)
+ 3 将数据库中的表table1 、table2导出
+   exp system/manager@TEST file=d:\daochu.dmp tables=(table1,table2) 
+ 4 将数据库中的表table1中的字段filed1以"00"打头的数据导出
+   exp system/manager@TEST file=d:\daochu.dmp tables=(table1) query=\" where filed1 like  '00%'\"
+上面是常用的导出，对于压缩我不太在意，用winzip把dmp文件可以很好的压缩。
+不过在上面命令后面 加上 compress=y  就可以了
+ 1 将D:\daochu.dmp 中的数据导入 TEST数据库中。
+   imp system/manager@TEST  file=d:\daochu.dmp
+   上面可能有点问题，因为有的表已经存在，然后它就报错，对该表就不进行导入。
+   在后面加上 ignore=y 就可以了。
+ 2 将d:\daochu.dmp中的表table1 导入
+ imp system/manager@TEST  file=d:\daochu.dmp  tables=(table1) 
+-----------------------------------
+select count(*) from v$session; 
+select count(*) from v$process; 查看session和连接进程数。
+-----------------------------------------------------------
+select * from v$nls_parameters where parameter='NLS_CHARACTERSET'; 

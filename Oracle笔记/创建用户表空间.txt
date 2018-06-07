@@ -1,0 +1,31 @@
+SYS用户在CMD下以DBA身份登陆：
+sqlplus /nolog
+然后再conn / as sysdba
+
+/*分为四步 */
+/*第1步：创建临时表空间  */
+create temporary tablespace posp_temp 
+tempfile '/u01/app/oracle/oradata/pospdb/posp_temp.dbf' 
+size 1000M autoextend on 
+next 100M maxsize 1000M extent management local; 
+ 
+/*第2步：创建数据表空间  */
+create tablespace posp_data 
+datafile '/u01/app/oracle/oradata/pospdb/posp_data.dbf' 
+size 10000M autoextend on 
+next 100M  maxsize 10000M extent management local;
+
+create tablespace posp_idx
+datafile '/u01/app/oracle/oradata/pospdb/posp_idx.dbf' 
+size 4000M autoextend on 
+next 100M  maxsize 4000M extent management local;
+ 
+/*第3步：创建用户并指定表空间  */
+create user posp identified by posp  
+default tablespace posp_data  
+temporary tablespace posp_temp;  
+ 
+/*第4步：给用户授予权限  */
+grant connect,resource,dba to posp;  
+
+
